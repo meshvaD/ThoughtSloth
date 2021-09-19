@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -115,9 +116,11 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     void updateEmotions(int month){
-        System.out.println("IDENTIFIER: " + MainActivity.getIdentifier());
+        System.out.println("IDENTIFIER: " + MainActivity.identifier);
 
-        DatabaseReference monthRef = database.getReference(MainActivity.getIdentifier())
+        String identifier = Settings.Secure.getString(getBaseContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+        DatabaseReference monthRef = database.getReference(identifier)
                 .child("2021," + Integer.toString(month));
 
         monthRef.addListenerForSingleValueEvent(new ValueEventListener() {

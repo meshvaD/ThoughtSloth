@@ -21,7 +21,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
-    static String identifier;
+    public static String identifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public static String getIdentifier(){
-        return identifier;
-    }
+//    public static String getIdentifier(){
+//        return identifier;
+//    }
 }
