@@ -11,6 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,33 +42,49 @@ public class Checkboxes extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.textView);
         button.setOnClickListener(new View.OnClickListener() {
 
+            HashMap<String,String> map = new HashMap<String,String>();
+
+            String emotion = "";
+
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View view) {
-                if(happyBox.isChecked())
+                if(happyBox.isChecked()){
                     emotions.replace("Happy", 1);
-                else
+                    emotion = emotion + ",1";}
+                else{
                     emotions.replace("Happy", 0);
-                if(sadBox.isChecked())
+                    emotion = emotion + ",0";}
+                if(sadBox.isChecked()){
                     emotions.replace("Sad", 1);
-                else
+                    emotion = emotion + ",1";}
+                else{
                     emotions.replace("Sad", 0);
-                if(angryBox.isChecked())
+                    emotion = emotion + ",0";}
+                if(angryBox.isChecked()){
                     emotions.replace("Angry", 1);
-                else
+                    emotion = emotion + ",1";}
+                else{
                     emotions.replace("Angry", 0);
-                if(fearBox.isChecked())
+                    emotion = emotion + ",0";}
+                if(fearBox.isChecked()){
                     emotions.replace("Fear", 1);
-                else
+                    emotion = emotion + ",1";}
+                else{
                     emotions.replace("Fear", 0);
-                if(surpriseBox.isChecked())
+                    emotion = emotion + ",0";}
+                if(surpriseBox.isChecked()){
                     emotions.replace("Surprise", 1);
-                else
+                    emotion = emotion + ",1";}
+                else{
                     emotions.replace("Surprise", 0);
-                if(disgustBox.isChecked())
+                    emotion = emotion + ",0";}
+                if(disgustBox.isChecked()){
                     emotions.replace("Disgust", 1);
-                else
+                    emotion = emotion + ",1";}
+                else{
                     emotions.replace("Disgust", 0);
+                    emotion = emotion + ",0";}
 
                 textView.setText("Happy: " + emotions.get("Happy") + "\n" +
                         "Sad: " + emotions.get("Sad") + "\n" +
@@ -76,7 +95,14 @@ public class Checkboxes extends AppCompatActivity {
 
                 Intent startIntent = new Intent(getApplicationContext(), Graph.class);
                 startIntent.putExtra("hashMap", (Serializable) emotions);
+                startIntent.putExtra("date", getIntent().getStringExtra("date"));
                 startActivity(startIntent);
+
+                System.out.println("EMOTION CHECK: " + emotion);
+
+//                FirebaseDatabase database = FirebaseDatabase.getInstance();
+//                DatabaseReference ref = database.getReference(MainActivity.getIdentifier());
+//                ref.child("2021,9").child("19").child("emotion").setValue(emotion);
             }
         });
     }

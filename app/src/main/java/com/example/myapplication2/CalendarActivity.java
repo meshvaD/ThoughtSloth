@@ -2,12 +2,14 @@ package com.example.myapplication2;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -33,6 +35,7 @@ public class CalendarActivity extends AppCompatActivity {
     private Map<String, Integer> emotionToColors;
 
     FirebaseDatabase database;
+    String[] typeEmotions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +66,13 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent startIntent = new Intent(getApplicationContext(), Graph.class);
+                CalendarDay date = calendarView.getSelectedDate();
+                String selected = Integer.toString(date.getYear()) + ',' +
+                        Integer.toString((date.getMonth()+1)) + ',' +
+                        Integer.toString(date.getDay());
+                startIntent.putExtra("date", selected);
                 startActivity(startIntent);
+
             }
         });
 
@@ -84,18 +93,7 @@ public class CalendarActivity extends AppCompatActivity {
         for(int i = 10; i < 20; i++)
             tenEventDays.add(CalendarDay.from(2021,8, i));
 
-//        Map<String, Integer> emotions = (Map<String, Integer>) getIntent().getSerializableExtra("hashMap");
-//        List<List<String>> allEmotions = new ArrayList<>();
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Happy", "Surprise"))); // 9.10 (Yellow, Orange)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Fear"))); // 9.11 (Purple)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Fear"))); // 9.12 (Purple)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Happy"))); // 9.13 (Yellow)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Angry", "Disgust"))); // 9.14 (Red, Green)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Angry", "Surprise"))); // 9.15 (Orange, Red)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Happy", "Surprise"))); // 9.16 (Orange, Yellow)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Fear"))); // 9.17 (Purple)
-//        allEmotions.add(new ArrayList<>(Arrays.asList("Happy", "Surprise"))); // 9.18 (Orange, Yellow)
-        String[] typeEmotions = new String[]{"Happy", "Sad", "Angry", "Fear", "Surprise", "Disgust"};
+        typeEmotions = new String[]{"happy", "sad", "angry", "fear", "surprise", "disgust"};
 
         updateEmotions(Calendar.getInstance().getTime().getMonth()+1);
 
@@ -114,58 +112,53 @@ public class CalendarActivity extends AppCompatActivity {
         });
 
 
-//        List<String> temp = new ArrayList<>();
-//        if(emotions != null) {
-//            for(int i = 0; i < typeEmotions.length; i++) {
-//                if(emotions.get(typeEmotions[i]) == 1)
-//                    temp.add(typeEmotions[i]);
-//            }
-//        }
-//        allEmotions.add(temp);
-//
-//        for(int i = 0; i < tenEventDays.size(); i++) {
-//            CalendarDay currDay = tenEventDays.get(i);
-//            List<String> currEmotions = allEmotions.get(i);
-//            int[] currColors = new int[currEmotions.size()];
-//            for(int j = 0; j < currEmotions.size(); j++)
-//                currColors[j] = emotionToColors.get(currEmotions.get(j));
-//
-//            calendarView.addDecorator(new Decorator(currDay, currColors));
-//        }
-
-        List<CalendarDay> threeEventDays = new ArrayList<>();
-        threeEventDays.add(CalendarDay.today());
-        threeEventDays.add(CalendarDay.from(2021, 9, 11));
-        threeEventDays.add( CalendarDay.from(2021, 9,10));
-
-        List<CalendarDay> fourEventDays = new ArrayList<>();
-        threeEventDays.add(CalendarDay.from(2021, 8, 9));
-        threeEventDays.add(CalendarDay.from(2021, 8, 11));
-        threeEventDays.add( CalendarDay.from(2021, 8,10));
-
     }
 
     void updateEmotions(int month){
+        System.out.println("IDENTIFIER: " + MainActivity.getIdentifier());
 
         DatabaseReference monthRef = database.getReference(MainActivity.getIdentifier())
                 .child("2021," + Integer.toString(month));
 
         monthRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot date : snapshot.getChildren()){
+                    if (date.exists()){
+
+                    }
                     CalendarDay currDate = CalendarDay.from(2021, month-1, Integer.parseInt(date.getKey()));
 
                     HashMap<String,String>map = (HashMap<String, String>) date.getValue();
 
                     System.out.println("MONTH QUERY: " + map.get("emotion") + date.getKey() + ", " );
 
-                    String[] emotions = map.get("emotion").split(",");
-                    int[] currColours = new int[emotions.length];
-                    for (int i=0; i<emotions.length; i++){
-                        currColours[0] = emotionToColors.get(emotions[i]);
+                    if (map.containsKey("emotion")){
+                        String[] emotions = map.get("emotion").split(",");
+
+                        ArrayList<Integer> currColours = new ArrayList<>();
+                        for (int i=0; i<emotions.length; i++){
+                            double intensity = Double.parseDouble(emotions[i]);
+                            if (intensity >=0.3){
+                                System.out.println("TYPE: " + typeEmotions[i]);
+                                currColours.add(emotionToColors.get(typeEmotions[i]));
+                            }
+                        }
+                        System.out.println("LENGTH: " + currColours.size());
+
+                        int[] colourArray = new int[currColours.size()];
+                        for (int i=0; i<colourArray.length; i++){
+                            colourArray[i] = currColours.get(i);
+                        }
+//                    int[] currColours = new int[6];
+//                    for (int i=0; i<ranges.length; i++){
+//                        currColours[0] = emotionToColors.get(emotions[i]);
+//                    }
+                        calendarView.addDecorator(new Decorator(currDate, colourArray));
                     }
-                    calendarView.addDecorator(new Decorator(currDate, currColours));
+
+
 
                 }
             }

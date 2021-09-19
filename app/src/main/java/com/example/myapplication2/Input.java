@@ -38,12 +38,15 @@ public class Input extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         input = (EditText) findViewById(R.id.input);
 
-        DatabaseReference userRef = database.getReference(MainActivity.getIdentifier()).child(year + ',' + month).child(day);
+        DatabaseReference userRef = database.getReference(MainActivity.getIdentifier()).child(year + "," + month).child(day);
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                HashMap<String,String> map = (HashMap<String, String>) snapshot.getValue();
-                input.setText(map.get("entry"));
+                if (snapshot.exists()){
+                    HashMap<String,String> map = (HashMap<String, String>) snapshot.getValue();
+                    input.setText(map.get("entry"));
+                }
+
             }
 
             @Override
@@ -75,6 +78,7 @@ public class Input extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent startIntent = new Intent(getApplicationContext(), Checkboxes.class);
+                startIntent.putExtra("date", data);
                 startActivity(startIntent);
             }
         });
